@@ -1,0 +1,27 @@
+class Pauser:
+    def __init__(self):
+        self.records = []
+    
+    def __getattr__(self, name):
+        if name.startswith('z') and name[1:].isdigit():
+            duration = int(name[1:])
+            frame = inspect.currentframe().f_back
+            filename = os.path.basename(frame.f_code.co_filename)
+            lineno = frame.f_lineno
+            
+            print(f"Pausing for {duration} seconds at {filename}, line {lineno}")
+            self.records.append((filename, lineno, duration))
+            time.sleep(duration)
+            print(f"Resumed after {duration} seconds")
+            return
+        
+        if name == "info":
+            if not self.records:
+                print("No pauses made.")
+            else:
+                for filename, lineno, duration in self.records:
+                    print(f"Paused for {duration} seconds at {filename}, line {lineno}")
+            print("Console output complete.")
+            return
+        
+        raise AttributeError(f"Invalid attribute: {name}")
